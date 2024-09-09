@@ -1,0 +1,43 @@
+import socket
+import threading
+import time
+
+def sending(client, first_name, last_name):
+    while True:
+        #time.sleep(1)
+        message = input("Enter your message: ")
+        full_message = f"{first_name}|{last_name}|{message}"
+        client.sendto(full_message.encode(), (host, port))
+
+def listening(server):
+    while True:
+            try:
+                data, address = server.recvfrom(2048)
+                message = data.decode()
+                firstname, lastname, message = message.split('|')
+                print(f"\nfrom {firstname} {lastname} Received: {message}")
+            except: pass
+
+
+def main():
+    global host, port
+    host = "127.0.0.2"
+    port = 5051
+
+    client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server.bind(('', port))
+
+    first_name = input("Enter your first name: ")
+    last_name = input("Enter your last name: ")
+
+    t1 = threading.Thread(target=sending, args=(client, first_name, last_name))
+    t2 = threading.Thread(target=listening, args=(server,))
+    t1.start()
+    t2.start()
+
+    # Create another set of sockets for listening and sending
+
+
+if __name__ == "__main__":
+    main()
